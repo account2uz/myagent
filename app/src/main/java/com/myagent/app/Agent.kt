@@ -57,7 +57,7 @@ class Agent(
     fun run(userText: String): String {
         val key = Prefs.get(ctx, "key").trim()
         if (key.isEmpty()) return "Age Settings (⚙) e giye Gemini API key boshao."
-        val model = Prefs.get(ctx, "model", "gemini-2.5-flash").ifBlank { "gemini-2.5-flash" }
+        val model = Prefs.get(ctx, "model", "gemini-3.8-flash").ifBlank { "gemini-3.8-flash" }
 
         val startLen = history.length()
         try {

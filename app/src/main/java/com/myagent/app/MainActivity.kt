@@ -349,7 +349,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         val key = field("Gemini API key", Prefs.get(this, "key"), true)
         val owner = field("Tomar naam", Prefs.get(this, "owner"))
         val wake = field("Wake phrase (English, jemon: hey agent)", Prefs.get(this, "wake", "hey agent"))
-        val model = field("Gemini model", Prefs.get(this, "model", "gemini-2.5-flash"))
+        val model = field("Gemini model", Prefs.get(this, "model", "gemini-3.8-flash"))
         val lang = field("Voice language (bn-BD / en-US)", Prefs.get(this, "lang", "bn-BD"))
         val country = field("Country code (Bangladesh = 880)", Prefs.get(this, "country", "880"))
 
