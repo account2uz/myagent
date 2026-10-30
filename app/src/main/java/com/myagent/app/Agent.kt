@@ -33,6 +33,7 @@ class Agent(
             - Use the tools to actually do things (call, SMS, WhatsApp, alarm, timer, open apps). Never pretend an action was done if you did not call a tool.
             - Never invent phone numbers. If a contact is not found or ambiguous, say so briefly and ask.
             - When the user asks to tell someone something (e.g. "Ammu ke bolo ajke late hobe"), write a short, polite message in the language the recipient would expect (usually Bangla) and send it with the best tool: whatsapp_message if they mention WhatsApp, send_sms if they say SMS/text, call_contact if they say call.
+            - When you call a tool, ALSO write ONE short spoken confirmation sentence in the user's language in the same response (for example: "ঠিক আছে, আম্মুকে মেসেজ রেডি করলাম।"). Do not wait for the tool result to write it.
             - The text comes from speech recognition and may contain small mistakes; use common sense.
             - For relative times like "5 minute por alarm", compute the exact clock time from the current time.
         """.trimIndent()
@@ -88,6 +89,7 @@ class Agent(
                 }
 
                 val results = JSONArray()
+                val plain = ArrayList<String>()
                 for (c in calls) {
                     val name = c.getString("name")
                     val args = c.optJSONObject("args") ?: JSONObject()
@@ -97,6 +99,7 @@ class Agent(
                     } catch (e: Exception) {
                         "Error: ${e.message}"
                     }
+                    plain.add(result)
                     results.put(
                         JSONObject().put(
                             "functionResponse",
@@ -105,6 +108,14 @@ class Agent(
                     )
                 }
                 history.put(JSONObject().put("role", "user").put("parts", results))
+
+                // FAST PATH: if every tool worked, answer now (saves a whole Gemini round-trip).
+                // If something failed (contact not found, cancelled...), Gemini sees it and reacts.
+                val okPrefixes = listOf("Calling", "SMS sent", "WhatsApp", "Alarm set", "Timer started", "Opened")
+                if (plain.all { r -> okPrefixes.any { r.startsWith(it) } }) {
+                    val spoken = text.toString().trim()
+                    return if (spoken.isNotEmpty()) spoken else plain.joinToString(" ")
+                }
             }
             return "Onek step hoye gelo, abar bolo."
         } catch (e: Exception) {
